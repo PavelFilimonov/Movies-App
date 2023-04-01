@@ -1,0 +1,7 @@
+.search-line {
+  display: flex;
+  width: 938px;
+  height: 40px;
+  justify-content: center;
+  margin: 0 auto 34px;
+}

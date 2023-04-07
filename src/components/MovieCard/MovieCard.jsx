@@ -22,11 +22,7 @@ const MovieCard = ({ poster_path, title, overview, vote_average, release_date, g
 
   return (
     <div className='card'>
-      <Card
-        hoverable
-        // loading
-        className='card-body'
-      >
+      <Card hoverable className='card-body'>
         <Meta
           className='card-meta'
           title={

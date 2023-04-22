@@ -1,15 +1,15 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import debounce from 'lodash.debounce';
-import { Alert, message } from 'antd';
+import { Tabs, Alert, message } from 'antd';
 import { Offline, Online } from 'react-detect-offline';
 
 import './index.css';
 
-import MovieTabs from './components/MovieTabs';
 import SearchLine from './components/SearchLine';
 import ContentMovies from './components/ContentMovies';
 import Footer from './components/Footer';
 import service from './service/service';
+import { Genres } from './context';
 
 const App = () => {
   const [text, setText] = useState('');
@@ -20,6 +20,7 @@ const App = () => {
   const [loading, setLoading] = useState(true);
   const [messageApi, contextHolder] = message.useMessage();
   const [error, setError] = useState(null);
+  const [ratedMovies, setRatedMovies] = useState([]);
 
   useEffect(() => {
     setLoading(true);
@@ -29,6 +30,7 @@ const App = () => {
         setGenresList(res);
       })
       .catch((err) => errorMessage(err));
+    service.createGuestSession();
     setLoading(false);
   }, []);
 
@@ -68,23 +70,75 @@ const App = () => {
 
   const debounceHandleChange = useMemo(() => debounce(handleSubmit, 500), []);
 
+  const ratedListMovies = () => {
+    setLoading(true);
+    service
+      .getRatedMovies()
+      .then((res) => {
+        setLoading(false);
+        setRatedMovies(res.results);
+        setSearchedData(res);
+        if (!res.results.length) {
+          throw new Error('Вы ничего не оценили');
+        }
+      })
+      .catch((err) => {
+        setError(err);
+        errorMessage(err);
+      });
+  };
+
+  const activeTab = (event) => {
+    if (event === '1') {
+      handleSubmit();
+    }
+    if (event === '2') {
+      ratedListMovies();
+    }
+  };
+
+  const items = [
+    {
+      key: '1',
+      label: 'Search',
+      children: (
+        <>
+          <main className='main'>
+            <SearchLine text={text} handleChange={handleChange} handleSubmit={handleSubmit} />
+            <ContentMovies movies={movies} loading={loading} error={error} />
+          </main>
+          <Footer setPage={setPage} searchedData={searchedData} />
+        </>
+      ),
+    },
+    {
+      key: '2',
+      label: 'Rated',
+      children: (
+        <>
+          <main className='main'>
+            <ContentMovies movies={ratedMovies} loading={loading} error={error} />
+          </main>
+          <Footer setPage={setPage} searchedData={searchedData} />
+        </>
+      ),
+    },
+  ];
+
   return (
     <>
       <Online>
-        {contextHolder}
-        <div className='page'>
-          <main className='main'>
-            <MovieTabs />
-            <SearchLine text={text} handleChange={handleChange} handleSubmit={handleSubmit} />
-            <ContentMovies movies={movies} genresList={genresList} loading={loading} error={error} />
-          </main>
-          <Footer setPage={setPage} searchedData={searchedData} />
-        </div>
+        <Genres.Provider value={genresList}>
+          {contextHolder}
+          <div className='page'>
+            <Tabs centered defaultActiveKey='1' items={items} onChange={activeTab} />
+          </div>
+        </Genres.Provider>
       </Online>
       <Offline>
         <Alert
           message='Отсутствует подключение к интернету!'
-          description='Проверьте подключение к интернету и, возможно, к VPN'
+          description='Проверьте подключение к интернету!'
           type='error'
           showIcon
         />

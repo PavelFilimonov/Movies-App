@@ -3,7 +3,7 @@ class Service {
   BASE_URL = 'https://api.themoviedb.org/3/';
 
   getData = async (value, page) => {
-    const url = `${this.BASE_URL}search/movie?api_key=${this._key}&query=${value || 'return'}&page=${page || '1'}`;
+    const url = `${this.BASE_URL}search/movie?api_key=${this._key}&query=${value}&page=${page}`;
     const response = await fetch(url);
     if (response.ok) {
       const movies = await response.json();

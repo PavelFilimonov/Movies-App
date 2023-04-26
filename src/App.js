@@ -35,7 +35,9 @@ const App = () => {
   }, []);
 
   useEffect(() => {
-    handleSubmit();
+    if (text && page) {
+      handleSubmit();
+    }
   }, [page]);
 
   const errorMessage = (error) => {

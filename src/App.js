@@ -53,21 +53,23 @@ const App = () => {
   };
 
   const handleSubmit = (text) => {
-    setLoading(true);
-    service
-      .getData(text, page)
-      .then((res) => {
-        setLoading(false);
-        setMovies(res.results);
-        setSearchedData(res);
-        if (!res.results.length) {
-          throw new Error('Ничего не найдено');
-        }
-      })
-      .catch((err) => {
-        setError(err);
-        errorMessage(err);
-      });
+    if (text) {
+      setLoading(true);
+      service
+        .getData(text, page)
+        .then((res) => {
+          setLoading(false);
+          setMovies(res.results);
+          setSearchedData(res);
+          if (!res.results.length) {
+            throw new Error('Ничего не найдено');
+          }
+        })
+        .catch((err) => {
+          setError(err);
+          errorMessage(err);
+        });
+    }
   };
 
   const debounceHandleChange = useMemo(() => debounce(handleSubmit, 500), []);
@@ -138,12 +140,7 @@ const App = () => {
         </Genres.Provider>
       </Online>
       <Offline>
-        <Alert
-          message='Отсутствует подключение к интернету!'
-          description='Проверьте подключение к интернету!'
-          type='error'
-          showIcon
-        />
+        <Alert message='Отсутствует подключение к интернету!' type='error' showIcon />
       </Offline>
     </>
   );
